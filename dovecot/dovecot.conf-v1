@@ -1,0 +1,43 @@
+protocols = imap imaps pop3 pop3s
+log_timestamp = "%Y-%m-%d %H:%M:%S "
+first_valid_uid=2222
+last_valid_uid=2222
+first_valid_gid=2222
+last_valid_gid=2222
+mail_privileged_group = vmail
+disable_plaintext_auth=yes
+auth_executable = /usr/lib/dovecot/dovecot-auth
+auth_verbose = yes
+mail_location = maildir:/var/vmail/%d/%n/Maildir
+ssl_cert_file = /etc/ssl/dovecot-cert.pem
+ssl_key_file = /etc/ssl/dovecot-key.pem
+protocol lda {
+  auth_socket_path = /var/run/dovecot/auth-master
+  postmaster_address = postmaster@rodingen.com
+  mail_plugins = sieve
+  log_path =
+}
+auth default {
+    mechanisms = plain login
+    passdb passwd-file {
+        args = scheme=SHA1 /etc/dovecot/users.conf
+    }
+    userdb static {
+        #args = /etc/dovecot/users.conf
+        args = uid=2222 gid=2222 home=/var/vmail/%d/%n allow_all_users=yes
+    }
+    socket listen {
+        master {
+            path = /var/run/dovecot/auth-master
+            mode = 0600
+            user = vmail
+            group = vmail
+        }
+        client {
+            path = /var/spool/postfix/private/auth
+            mode = 0660
+            user = postfix
+            group = postfix
+        }
+    }
+}
