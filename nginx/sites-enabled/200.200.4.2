@@ -1,9 +1,10 @@
 server {
     listen 200.200.4.2:80;
+    listen 192.168.1.186:80;
     server_name 200.200.4.2;
     access_log /var/log/rodingen.com_access.log;
     error_log /var/log/rodingen.com_error.log;
-    root /var/www/rodingen.com/vvv;
+    root /var/www/rodingen.com/vvv/;
     index index.php index.html index.htm;
 
     location / {
@@ -18,5 +19,27 @@ server {
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;           
+    }
+}
+
+server {
+    listen 443;
+    ssl on;
+    ssl_certificate /etc/ssl/nginx-cacert.pem;        # path to your cacert.pem
+    ssl_certificate_key /etc/ssl/nginx-key.pem;    # path to your privkey.pem
+    server_name 200.200.4.2;
+    root /var/www/rodingen.com/vvv/;
+    index index.php index.html index.htm;
+    access_log /var/log/rodingen.com_access.log;
+    error_log /var/log/rodingen.com_error.log;
+    fastcgi_param   HTTPS               on;
+    fastcgi_param   HTTP_SCHEME         https;
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
     }
 }
